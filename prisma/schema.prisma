@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Brand {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  logoUrl     String?  @db.VarChar(500)
+  website     String?  @db.VarChar(200)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  glasses Glasses[]
+
+  @@map("brands")
+}
+
+model Glasses {
+  id           Int           @id @default(autoincrement())
+  name         String        @db.VarChar(255)
+  brandId      Int
+  price        Decimal       @db.Decimal(10, 2)
+  description  String?       @db.Text
+  category     String        @db.VarChar(50)
+  frameType    String        @db.VarChar(50)
+  lensMaterial String        @db.VarChar(50)
+  frameColor   String        @db.VarChar(50)
+  lensColor    String        @db.VarChar(50)
+  modelPath    String        @db.VarChar(500)
+  thumbnailUrl String?       @db.VarChar(500)
+  images       String[]      @default([])
+  dimensions   Json // GlassesDimensions
+  materials    Json // GlassesMaterials
+  tags         String[]      @default([])
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  brand       Brand                   @relation(fields: [brandId], references: [id])
+  inventory   GlassesInventory?
+  reviews     GlassesReview[]
+  collections GlassesCollectionItem[]
+
+  @@index([category])
+  @@index([frameType])
+  @@index([brandId])
+  @@index([price])
+  @@index([isActive])
+  @@map("glasses")
+}
+
+model GlassesInventory {
+  id               Int      @id @default(autoincrement())
+  glassesId        Int      @unique
+  sku              String   @unique @db.VarChar(100)
+  quantity         Int      @default(0)
+  reservedQuantity Int      @default(0)
+  reorderLevel     Int      @default(10)
+  supplier         String?  @db.VarChar(200)
+  cost             Decimal  @db.Decimal(10, 2)
+  lastRestocked    DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  glasses Glasses @relation(fields: [glassesId], references: [id], onDelete: Cascade)
+
+  @@map("glasses_inventory")
+}
+
+model GlassesReview {
+  id                 Int      @id @default(autoincrement())
+  glassesId          Int
+  userId             String   @db.VarChar(100)
+  rating             Int      @db.SmallInt
+  title              String?  @db.VarChar(200)
+  comment            String?  @db.Text
+  isVerifiedPurchase Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  glasses Glasses @relation(fields: [glassesId], references: [id], onDelete: Cascade)
+
+  @@index([glassesId])
+  @@index([userId])
+  @@index([rating])
+  @@map("glasses_reviews")
+}
+
+model GlassesCollection {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(200)
+  description String?  @db.Text
+  isPublic    Boolean  @default(false)
+  createdBy   String   @db.VarChar(100)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items GlassesCollectionItem[]
+
+  @@index([createdBy])
+  @@index([isPublic])
+  @@map("glasses_collections")
+}
+
+model GlassesCollectionItem {
+  id           Int @id @default(autoincrement())
+  collectionId Int
+  glassesId    Int
+  order        Int @default(0)
+
+  collection GlassesCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  glasses    Glasses           @relation(fields: [glassesId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, glassesId])
+  @@map("glasses_collection_items")
+}
+
+model AdminUser {
+  id          String    @id @default(cuid())
+  email       String    @unique @db.VarChar(200)
+  name        String    @db.VarChar(100)
+  passwordHash String   @db.VarChar(255)
+  role        String    @db.VarChar(50)
+  permissions String[]  @default([])
+  isActive    Boolean   @default(true)
+  lastLogin   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  sessions AdminSession[]
+
+  @@map("admin_users")
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique @db.VarChar(500)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([expiresAt])
+  @@map("admin_sessions")
+}
+
+model UploadedFile {
+  id           String   @id @default(cuid())
+  filename     String   @db.VarChar(255)
+  originalName String   @db.VarChar(255)
+  mimeType     String   @db.VarChar(100)
+  size         Int
+  path         String   @db.VarChar(500)
+  url          String   @db.VarChar(500)
+  uploadedBy   String?  @db.VarChar(100)
+  uploadedAt   DateTime @default(now())
+
+  @@index([uploadedBy])
+  @@index([uploadedAt])
+  @@map("uploaded_files")
+}
