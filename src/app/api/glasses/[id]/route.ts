@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { GlassesRepository } from '@/lib/database/glasses-repository';
-import { UpdateGlassesRequest, ValidationError } from '@/types/database';
+import { UpdateGlassesRequest, ValidationError, GlassesCategory, FrameType, LensMaterial } from '@/types/database';
 import { z } from 'zod';
 
 const glassesRepository = new GlassesRepository();
@@ -13,9 +13,9 @@ const updateGlassesSchema = z.object({
   brand: z.string().min(1).max(100).optional(),
   price: z.number().positive().optional(),
   description: z.string().optional(),
-  category: z.enum(['prescription', 'sunglasses', 'reading', 'computer', 'safety', 'fashion']).optional(),
-  frameType: z.enum(['full_rim', 'semi_rimless', 'rimless', 'browline', 'aviator', 'wayfarer', 'round', 'square', 'oval', 'cat_eye']).optional(),
-  lensMaterial: z.enum(['plastic', 'polycarbonate', 'trivex', 'high_index', 'glass', 'cr39']).optional(),
+  category: z.nativeEnum(GlassesCategory).optional(),
+  frameType: z.nativeEnum(FrameType).optional(),
+  lensMaterial: z.nativeEnum(LensMaterial).optional(),
   frameColor: z.string().min(1).optional(),
   lensColor: z.string().min(1).optional(),
   modelPath: z.string().min(1).optional(),
