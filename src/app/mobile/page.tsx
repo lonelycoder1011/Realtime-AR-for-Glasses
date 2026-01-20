@@ -245,7 +245,7 @@ export default function MobilePage() {
                           return (
                             <div key={key} className="flex justify-between">
                               <span className="capitalize">{key}:</span>
-                              <span className="font-mono">{value}</span>
+                              <span className="font-mono">{String(value ?? '')}</span>
                             </div>
                           );
                         })}
