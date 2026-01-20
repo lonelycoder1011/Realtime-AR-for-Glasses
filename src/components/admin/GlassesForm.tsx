@@ -167,7 +167,7 @@ export const GlassesForm: React.FC<GlassesFormProps> = ({
         files.map(file => uploadImageWithPreview(file))
       );
       const imageUrls = results.map(result => result.uploadedFile.url);
-      handleChange('images', [...formData.images, ...imageUrls]);
+      handleChange('images', [...(formData.images ?? []), ...imageUrls]);
     } catch (error) {
       console.error('Failed to upload images:', error);
     }
@@ -175,20 +175,20 @@ export const GlassesForm: React.FC<GlassesFormProps> = ({
 
   // Add tag
   const addTag = () => {
-    if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      handleChange('tags', [...formData.tags, newTag.trim()]);
+    if (newTag.trim() && !(formData.tags ?? []).includes(newTag.trim())) {
+      handleChange('tags', [...(formData.tags ?? []), newTag.trim()]);
       setNewTag('');
     }
   };
 
   // Remove tag
   const removeTag = (tagToRemove: string) => {
-    handleChange('tags', formData.tags.filter(tag => tag !== tagToRemove));
+    handleChange('tags', (formData.tags ?? []).filter(tag => tag !== tagToRemove));
   };
 
   // Remove image
   const removeImage = (imageToRemove: string) => {
-    handleChange('images', formData.images.filter(img => img !== imageToRemove));
+    handleChange('images', (formData.images ?? []).filter(img => img !== imageToRemove));
   };
 
   // Validate form
@@ -417,9 +417,9 @@ export const GlassesForm: React.FC<GlassesFormProps> = ({
                   onChange={handleImagesUpload}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
-                {formData.images.length > 0 && (
+                {(formData.images ?? []).length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.images.map((image, index) => (
+                    {(formData.images ?? []).map((image, index) => (
                       <div key={index} className="relative">
                         <img src={image} alt={`Image ${index + 1}`} className="w-20 h-20 object-cover rounded" />
                         <button
@@ -451,9 +451,9 @@ export const GlassesForm: React.FC<GlassesFormProps> = ({
                 <Plus className="w-4 h-4" />
               </Button>
             </div>
-            {formData.tags.length > 0 && (
+            {(formData.tags ?? []).length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map((tag, index) => (
+                {(formData.tags ?? []).map((tag, index) => (
                   <Badge key={index} variant="secondary" className="flex items-center gap-1">
                     {tag}
                     <button
